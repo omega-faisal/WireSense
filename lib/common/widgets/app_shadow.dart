@@ -15,7 +15,7 @@ BoxDecoration appBoxShadow(
       border: boxBorder,
       boxShadow: [
         BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.3),
             spreadRadius: sR,
             blurRadius: bR,
             offset: const Offset(0, 1))

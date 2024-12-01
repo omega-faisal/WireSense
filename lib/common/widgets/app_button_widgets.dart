@@ -55,47 +55,33 @@ Widget documentsButtons(
     onTap: anyWayDoor!,
     child: Container(
       alignment: Alignment.center,
-      height: 55,
-      width: 350,
+      padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 7),
       decoration: appBoxDecoration(
           color: buttonColor,
           borderWidth: buttonBorderWidth,
-          radius: 10.w,
+          radius: 5,
           borderColor: Colors.grey.shade400),
       child: Row(
         children: [
-          Container(
-              height: 40.h,
-              width: 40.w,
-              decoration: appBoxDecoration(
-                  color: iconColor,
-                  radius: 7.w,
-                  borderWidth: 0.0,
-                  borderColor: Colors.white),
-              margin: EdgeInsets.symmetric(vertical: 0, horizontal: 10.w),
-              child: Icon(
-                buttonIcon,
-                color: Colors.black,
-                size: 20.h,
-              )),
-          SizedBox(
-            width: 5.w,
+          const SizedBox(
+            width: 10,
+          ),
+          Icon(
+            buttonIcon,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(
+            width: 10,
           ),
           Text(
             buttonText,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 16,
-                fontFamily: "Poppins",
+                fontFamily: "Inter",
                 fontWeight: FontWeight.w400,
-                color: Colors.black),
+                color: buttonTextColor),
           ),
-          SizedBox(
-            width: 5.w,
-          ),
-          Icon(
-            Icons.keyboard_arrow_right_outlined,
-            size: 3.h,
-          )
         ],
       ),
     ),

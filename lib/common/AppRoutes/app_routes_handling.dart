@@ -1,14 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wire_sense/main.dart';
+import 'package:wire_sense/features/Desired%20Properties%20Screen/view/control_command_page.dart';
+import '../../features/MainDashBoard/view/dashboard.dart';
 import '../Services/global.dart';
+import 'app_routes.dart';
 class appPages {
   static List<RouteEntity> routes() {
     return [
-      // RouteEntity(
-      //     path: AppRoutes.SPLASH,
-      //     page: const ProviderScope(child: SplashScreen())),
+      RouteEntity(
+          path: AppRoutes.COMMAND,
+          page: const ProviderScope(child: ControlCommand())),
+      RouteEntity(
+          path: AppRoutes.DASHBOARD,
+          page: const ProviderScope(child: MainDashBoard())),
     ];
   }
 
@@ -19,6 +24,16 @@ class appPages {
     if (settings.name != null) {
       var result = routes().where((element) => element.path == settings.name);
 
+      if(result.first.path ==AppRoutes.COMMAND)
+        {
+          return MaterialPageRoute(
+              builder: (_) => const ProviderScope(child: ControlCommand()),
+              settings: settings);
+        }
+      else{
+        return MaterialPageRoute(
+            builder: (_) => result.first.page, settings: settings);
+      }
       //   bool userRegisteredEarlier =
       //   Global.storageServices.getUserRegisteredEarlier();
       //   bool locationGranted = Global.storageServices.getLocationGranted();
@@ -57,9 +72,12 @@ class appPages {
       //         builder: (_) => result.first.page, settings: settings);
       //   }
       // }
+      return MaterialPageRoute(
+          builder: (_) => const ProviderScope(child: ControlCommand()),
+          settings: settings);
     }
     return MaterialPageRoute(
-        builder: (_) => const ProviderScope(child: TestScreen()),
+        builder: (_) => const ProviderScope(child: ControlCommand()),
         settings: settings);
   }
 }
