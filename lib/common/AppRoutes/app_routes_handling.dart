@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wire_sense/features/Desired%20Properties%20Screen/view/control_command_page.dart';
+import 'package:wire_sense/features/websc_test.dart';
 import '../../features/MainDashBoard/view/dashboard.dart';
 import '../Services/global.dart';
 import 'app_routes.dart';
@@ -10,10 +11,13 @@ class appPages {
     return [
       RouteEntity(
           path: AppRoutes.COMMAND,
-          page: const ProviderScope(child: ControlCommand())),
+          page: ProviderScope(child: ControlCenterPage())),
       RouteEntity(
           path: AppRoutes.DASHBOARD,
-          page: const ProviderScope(child: MainDashBoard())),
+          page: const ProviderScope(child: Dashboard())),
+      RouteEntity(
+          path: AppRoutes.WEBSOCKET,
+          page: const ProviderScope(child: WebscTest())),
     ];
   }
 
@@ -27,7 +31,7 @@ class appPages {
       if(result.first.path ==AppRoutes.COMMAND)
         {
           return MaterialPageRoute(
-              builder: (_) => const ProviderScope(child: ControlCommand()),
+              builder: (_) => ProviderScope(child: ControlCenterPage()),
               settings: settings);
         }
       else{
@@ -72,12 +76,12 @@ class appPages {
       //         builder: (_) => result.first.page, settings: settings);
       //   }
       // }
-      return MaterialPageRoute(
-          builder: (_) => const ProviderScope(child: ControlCommand()),
-          settings: settings);
+      // return MaterialPageRoute(
+      //     builder: (_) => const ProviderScope(child: ControlCommand()),
+      //     settings: settings);
     }
     return MaterialPageRoute(
-        builder: (_) => const ProviderScope(child: ControlCommand()),
+        builder: (_) =>  ProviderScope(child: ControlCenterPage()),
         settings: settings);
   }
 }

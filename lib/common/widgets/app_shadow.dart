@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../utils/app_colors.dart';
 
 BoxDecoration appBoxShadow(
-    {Color color = AppColors.primaryElement,
+    {Color color = AppColors.mainThemeColor,
       double radius = 15,
       double sR = 1,
       double bR = 2,
@@ -24,18 +24,37 @@ BoxDecoration appBoxShadow(
 
 
 BoxDecoration appBoxDecoration(
-    {Color color = AppColors.primaryBackground,
+    {Color color = AppColors.mainThemeColor,
     double radius = 15,
     double borderWidth = 1.5,
-    Color borderColor = AppColors.primaryText}) {
+      Color borderColor = AppColors.dashBoardSecondaryTextColor}) {
   return BoxDecoration(
       color: color,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(color: borderColor, width: borderWidth));
 }
 
+BoxDecoration appBoxDecorationWithGradient(
+    {Color color = AppColors.mainThemeColor,
+    double radius = 15,
+    double borderWidth = 1.5,
+      Color borderColor = AppColors.dashBoardSecondaryTextColor}) {
+  return BoxDecoration(
+      color: color,
+     gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          const Color(0xff868CFF),
+          color
+        ],
+      ),
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: borderColor, width: borderWidth));
+}
+
 BoxDecoration appBoxShadowWithUnidirectionalRadius(
-    {Color color = AppColors.primaryElement,
+    {Color color = AppColors.mainThemeColor,
     double radius = 20,
     double sR = 1,
     double bR = 2}) {

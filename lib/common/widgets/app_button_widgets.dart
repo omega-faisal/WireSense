@@ -7,8 +7,8 @@ import 'app_shadow.dart';
 
 Widget appButtons(
     {String buttonText = "Next",
-    Color buttonColor = AppColors.primaryElement,
-    Color buttonTextColor = AppColors.primaryElementText,
+    Color buttonColor = AppColors.mainThemeColor,
+    Color buttonTextColor = AppColors.dashBoardSecondaryTextColor,
     double buttonBorderWidth = 0.0,
     double height = 50,
     double width = 340,
@@ -43,8 +43,8 @@ Widget appButtons(
 
 Widget documentsButtons(
     {String buttonText = "Next",
-    Color buttonColor = AppColors.documentButtonBg,
-    Color buttonTextColor = AppColors.primaryElementText,
+      Color buttonColor = AppColors.mainThemeColor,
+      Color buttonTextColor = AppColors.dashBoardSecondaryTextColor,
     IconData buttonIcon = Icons.error_outline,
     double buttonBorderWidth = 1.0,
     Color iconColor = const Color(0xfffff0ce),
@@ -90,8 +90,8 @@ Widget documentsButtons(
 
 Widget customIconAppButton(
     {String buttonText = "Next",
-    Color buttonColor = AppColors.primaryElement,
-    Color buttonTextColor = AppColors.primaryElementText,
+      Color buttonColor = AppColors.mainThemeColor,
+      Color buttonTextColor = AppColors.dashBoardSecondaryTextColor,
     double buttonTextSize = 16,
     double buttonRadius = 15,
     Color borderColor = Colors.black,

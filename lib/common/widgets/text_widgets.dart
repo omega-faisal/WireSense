@@ -13,7 +13,7 @@ class text24normal extends StatelessWidget {
       {super.key,
       this.text = "",
       this.fontWeight = FontWeight.normal,
-      this.color = AppColors.primaryText,
+      this.color = AppColors.dashBoardSecondaryTextColor,
       this.fontfamily = "Inter"});
 
   @override
@@ -39,7 +39,7 @@ class text16normal extends StatelessWidget {
       {super.key,
       this.text = "",
       this.fontWeight = FontWeight.normal,
-      this.color = AppColors.primaryText,
+      this.color = AppColors.dashBoardSecondaryTextColor,
       this.fontfamily = "Inter",
       this.align = TextAlign.center});
 
@@ -68,7 +68,7 @@ class textcustomnormal extends StatelessWidget {
       {super.key,
       this.text = "",
       this.fontWeight = FontWeight.normal,
-      this.color = AppColors.primaryText,
+      this.color = AppColors.dashBoardSecondaryTextColor,
       this.fontSize = 10,
       this.fontfamily = "Inter",
       this.align=TextAlign.center});
@@ -96,7 +96,7 @@ class text14normal extends StatelessWidget {
       {super.key,
       this.text = "",
       this.fontWeight = FontWeight.normal,
-      this.color = AppColors.primaryText,
+      this.color = AppColors.dashBoardSecondaryTextColor,
       this.fontfamily = "Inter",
       this.align = TextAlign.center});
 
@@ -122,7 +122,7 @@ class text20normal extends StatelessWidget {
       {super.key,
       this.text = "",
       this.fontWeight = FontWeight.normal,
-      this.color = AppColors.primaryText,
+      this.color = AppColors.dashBoardSecondaryTextColor,
       this.fontfamily = "Inter"});
 
   @override
@@ -154,9 +154,9 @@ class textUnderline extends StatelessWidget {
             fontWeight: FontWeight.w400,
             fontSize: 15,
             letterSpacing: 0.5,
-            color: AppColors.primaryText,
+            color: AppColors.dashBoardSecondaryTextColor,
             decoration: TextDecoration.underline,
-            decorationColor: AppColors.primaryText),
+            decorationColor: AppColors.dashBoardSecondaryTextColor),
       ),
     );
   }
@@ -164,13 +164,12 @@ class textUnderline extends StatelessWidget {
 
 class dashLine extends StatelessWidget {
   final Color color;
-  final double width;
+
   final double height;
 
   const dashLine({
     super.key,
     this.color = Colors.grey,
-    this.width= 400,
     this.height= 2
   });
 
@@ -178,7 +177,6 @@ class dashLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: height,
-      width: width,
       color: color,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:wire_sense/common/utils/app_colors.dart';
 import 'package:wire_sense/common/widgets/text_widgets.dart';
 
 import 'app_shadow.dart';
@@ -82,8 +83,8 @@ Widget textLoginBoxWithDimensions(
     void Function(String value)? func,
     String? Function(String value)? validator,
     double width = 260,
-    double height = 55,
-    TextInputType? keyboardType = TextInputType.multiline,
+      TextInputType? keyboardType = TextInputType.multiline,
+    IconData icon = Icons.type_specimen,
     AutovalidateMode? validateMode}) {
   return Container(
     width: width,
@@ -96,36 +97,39 @@ Widget textLoginBoxWithDimensions(
       autovalidateMode: validateMode,
       // this is for decorating the text field
       decoration: InputDecoration(
-          contentPadding: EdgeInsets.fromLTRB(10.h, 3.h, 0, 3),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
           hintText: hintText,
-          fillColor: Colors.grey.shade200,
+          prefixIcon: Icon(icon,size: 20,),
+          fillColor: Colors.white,
           filled: true,
-          hintStyle: TextStyle(
-            fontSize: 17,
-            color: Colors.grey.shade500,
+          hintStyle: const TextStyle(
+            fontSize: 14,
+            color: AppColors.dashBoardSecondaryTextColor,
+            fontWeight: FontWeight.w400,
             fontFamily: "Inter",
           ),
           border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade400),
+              borderSide: BorderSide(color: Colors.grey.shade400,width: 0.0),
               borderRadius: BorderRadius.circular(10)),
 
           ///this is the default border active when not focused
           enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade400),
+              borderSide: const BorderSide(color: Colors.white,width: 0.0),
               borderRadius: BorderRadius.circular(10)),
           errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red),
+              borderSide: const BorderSide(color: Colors.red,width: 0.5),
               borderRadius: BorderRadius.circular(10)),
 
           /// this is the focused border
           focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade400),
+              borderSide: BorderSide(color: Colors.grey.shade400,width: 0.0),
               borderRadius: BorderRadius.circular(10)),
 
           ///this will be used when a text field in disabled
           disabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: Colors.grey.shade400,
+                  width: 0.0
               ),
               borderRadius: BorderRadius.circular(10))),
       maxLines: 1,

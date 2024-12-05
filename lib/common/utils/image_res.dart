@@ -9,6 +9,8 @@ class ImageRes {
   ///image sources
   static const String wireSenseLogo = "$_imageBase/wiresense_logo.jpg";
   static const String letterW = "$_imageBase/letter_w.png";
+  //todo - to be removed
+  static const String chartDemo = "$_imageBase/chart_demo.png";
 
 
 
