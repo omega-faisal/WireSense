@@ -2,9 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wire_sense/features/Desired%20Properties%20Screen/view/control_command_page.dart';
+import 'package:wire_sense/features/LoginScreen/view/login_scr.dart';
+import 'package:wire_sense/features/optionsScreen/view/options_scr.dart';
 import 'package:wire_sense/features/websc_test.dart';
+import '../../features/ForwardProcessing/PredictProperties/view/predict_prop.dart';
+import '../../features/ForwardProcessing/PredictPropertyResultScreen/view/property_res.dart';
 import '../../features/MainDashBoard/view/dashboard.dart';
-import '../Services/global.dart';
 import 'app_routes.dart';
 class appPages {
   static List<RouteEntity> routes() {
@@ -18,6 +21,18 @@ class appPages {
       RouteEntity(
           path: AppRoutes.WEBSOCKET,
           page: const ProviderScope(child: WebscTest())),
+      RouteEntity(
+          path: AppRoutes.OPTIONS,
+          page: ProviderScope(child: FancyAuthScreen())),
+      RouteEntity(
+          path: AppRoutes.PREDICTPROP,
+          page: const ProviderScope(child: ParameterSliders())),
+      RouteEntity(
+          path: AppRoutes.PREDICTPROPRES,
+          page: const ProviderScope(child: PropertyResultScreen())),
+      RouteEntity(
+          path: AppRoutes.LOGIN,
+          page: const ProviderScope(child: LoginPage())),
     ];
   }
 

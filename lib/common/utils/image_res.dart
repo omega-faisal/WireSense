@@ -12,6 +12,8 @@ class ImageRes {
   //todo - to be removed
   static const String chartDemo = "$_imageBase/chart_demo.png";
 
+  static const String wireSenseElectro = "$_imageBase/wiresense_electro.png";
+
 
 
   ///icon sources
