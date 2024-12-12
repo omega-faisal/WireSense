@@ -257,7 +257,7 @@ class FancyAuthScreenState extends State<FancyAuthScreen>
     ///forward
     return GestureDetector(
       onTap: (){
-        navKey.currentState?.pushNamed("/input_parameter_sc");
+        navKey.currentState?.pushNamed("/dashboard");
       },
       child: SizedBox.expand(
         child: Stack(
@@ -318,58 +318,62 @@ class FancyAuthScreenState extends State<FancyAuthScreen>
 
   Widget _buildParameterForm() {
     /// reverse
-    //todo - to push the three desired prop path in here...
-    return SizedBox.expand(
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              ImageRes.reverse_model_icon,
-              fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: (){
+        navKey.currentState?.pushNamed("/input_phy_prop");
+      },
+      child: SizedBox.expand(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                ImageRes.reverse_model_icon,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withOpacity(0.6),
-                    Colors.grey.withOpacity(0.4),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withOpacity(0.6),
+                      Colors.grey.withOpacity(0.4),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                 ),
               ),
             ),
-          ),
-          // Text overlay
-          const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Get Parameters',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
+            // Text overlay
+            const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Get Parameters',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 2,
+                    ),
                   ),
-                ),
-                SizedBox(height: 10),
-                // Text(
-                //   'Feel the beauty around you',
-                //   style: TextStyle(
-                //     fontSize: 18,
-                //     color: Colors.white.withOpacity(0.9),
-                //     fontStyle: FontStyle.italic,
-                //   ),
-                // ),
-              ],
+                  SizedBox(height: 10),
+                  // Text(
+                  //   'Feel the beauty around you',
+                  //   style: TextStyle(
+                  //     fontSize: 18,
+                  //     color: Colors.white.withOpacity(0.9),
+                  //     fontStyle: FontStyle.italic,
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

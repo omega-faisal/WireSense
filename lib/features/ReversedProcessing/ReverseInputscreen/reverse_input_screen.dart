@@ -1,16 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wire_sense/common/Api/api_calling.dart';
+import 'package:wire_sense/features/ReversedProcessing/model/data_model_new.dart';
+import '../../../common/utils/image_res.dart';
 import '../../../main.dart';
+import '../reverseOutPutScreen/reverse_output.dart';
 
-class ControlCenterPage extends StatelessWidget {
-  final TextEditingController temperatureController = TextEditingController();
-  final TextEditingController pressureController = TextEditingController();
-  final TextEditingController speedController = TextEditingController();
+class ControlCenterPage extends ConsumerStatefulWidget {
+
   ControlCenterPage({super.key});
 
   @override
+  ConsumerState<ControlCenterPage> createState() => _ControlCenterPageState();
+}
+
+class _ControlCenterPageState extends ConsumerState<ControlCenterPage> {
+  final TextEditingController utsController = TextEditingController();
+
+  final TextEditingController elongationController = TextEditingController();
+
+  final TextEditingController conductivityController = TextEditingController();
+
+
+  late List<MeasurementData> dashBoardData;
+
+  @override
+  void initState() {
+    //getNewData();
+    Api.reverseModel();
+    super.initState();
+  }
+  // Future<void> getNewData() async {
+  //   dashBoardData = await Api.getDashBoardData();
+  //   _simulateRealTimeData(dashBoardData);
+  //   if (kDebugMode) {
+  //     print('the dashboard has some data as -> ${dashBoardData[0].elongation}');
+  //   }
+  // }
+
+  @override
   Widget build(BuildContext context) {
+
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(
+
+        context).size.height;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -23,8 +57,8 @@ class ControlCenterPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/letter-w 1.png'),
-                  Text(
+                  Image.asset(ImageRes.letterW,height: screenHeight*0.1,),
+                  const Text(
                     "ireSense",
                     style: TextStyle(
                       fontSize: 48,
@@ -35,7 +69,7 @@ class ControlCenterPage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 40,),
+              const SizedBox(height: 40,),
               const Text(
                 'Aluminium Wire Rod Physical Properties',
                 style: TextStyle(
@@ -57,28 +91,35 @@ class ControlCenterPage extends StatelessWidget {
               const SizedBox(height: 40),
               _buildInputField(
                 screenWidth: screenWidth,
-                controller: temperatureController,
+                controller: utsController,
                 label: 'UTS (MPa)',
                 icon: Icons.handyman,
               ),
               const SizedBox(height: 20),
               _buildInputField(
                 screenWidth: screenWidth,
-                controller: pressureController,
+                controller: elongationController,
                 label: 'Elongation (%)',
                 icon: Icons.straighten,
               ),
               const SizedBox(height: 20),
               _buildInputField(
                 screenWidth: screenWidth,
-                controller: speedController,
+                controller: conductivityController,
                 label: 'Conductivity (S/M)',
                 icon: Icons.bolt,
               ),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
-                  navKey.currentState?.pushNamed("/dashboard");
+                  if(conductivityController.text.isNotEmpty && elongationController.text.isNotEmpty && utsController.text.isNotEmpty)
+                    {
+                       Navigator.push(context, MaterialPageRoute(builder: (context)=>ReverseOutput(uts: double.parse(utsController.text), conductivity: double.parse(conductivityController.text), elongation: double.parse(elongationController.text),)));
+
+                    }
+                  else{
+                    showDialog(context: context, builder: (context)=>const Center(child: Text('error occured during call')));
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,

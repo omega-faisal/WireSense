@@ -1,38 +1,38 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wire_sense/features/Desired%20Properties%20Screen/view/control_command_page.dart';
+import 'package:wire_sense/features/ForwardProcessing/ForwardInput/view/forward_input.dart';
 import 'package:wire_sense/features/LoginScreen/view/login_scr.dart';
 import 'package:wire_sense/features/optionsScreen/view/options_scr.dart';
-import 'package:wire_sense/features/websc_test.dart';
-import '../../features/ForwardProcessing/PredictProperties/view/predict_prop.dart';
-import '../../features/ForwardProcessing/PredictPropertyResultScreen/view/property_res.dart';
+import '../../features/ForwardProcessing/ForwardOutputScreen/view/forward_output.dart';
 import '../../features/MainDashBoard/view/dashboard.dart';
+import '../../features/ReversedProcessing/ReverseInputscreen/reverse_input_screen.dart';
+import '../../features/ReversedProcessing/reverseOutPutScreen/reverse_output.dart';
 import 'app_routes.dart';
 class appPages {
   static List<RouteEntity> routes() {
     return [
       RouteEntity(
-          path: AppRoutes.COMMAND,
-          page: ProviderScope(child: ControlCenterPage())),
-      RouteEntity(
           path: AppRoutes.DASHBOARD,
           page: const ProviderScope(child: Dashboard())),
-      // RouteEntity(
-      //     path: AppRoutes.WEBSOCKET,
-      //     page: const ProviderScope(child: WebscTest())),
       RouteEntity(
           path: AppRoutes.OPTIONS,
           page: ProviderScope(child: FancyAuthScreen())),
       RouteEntity(
-          path: AppRoutes.INPUTPARAMETER,
-          page: const ProviderScope(child: InputParametersScreen())),
+          path: AppRoutes.FORWARDINPUTS,
+          page: const ProviderScope(child: ForwardInputScreen())),
       RouteEntity(
-          path: AppRoutes.PREDICTPROPRESTEST,
-          page: const ProviderScope(child: PropertyResultScreen())),
+          path: AppRoutes.FORWARDOUTPUTS,
+          page: const ProviderScope(child: ForwardOutput(null,null,null))),
       RouteEntity(
           path: AppRoutes.LOGIN,
           page: const ProviderScope(child: LoginPage())),
+      RouteEntity(
+          path: AppRoutes.REVERSEINPUTS,
+          page: ProviderScope(child: ControlCenterPage())),
+      RouteEntity(
+          path: AppRoutes.REVERSEOUTPUTS,
+          page: const ProviderScope(child: ReverseOutput(uts: null, conductivity: null, elongation: null,))),
     ];
   }
 
@@ -43,10 +43,10 @@ class appPages {
     if (settings.name != null) {
       var result = routes().where((element) => element.path == settings.name);
 
-      if(result.first.path ==AppRoutes.COMMAND)
+      if(result.first.path ==AppRoutes.LOGIN)
         {
           return MaterialPageRoute(
-              builder: (_) => ProviderScope(child: ControlCenterPage()),
+              builder: (_) => const ProviderScope(child: LoginPage()),
               settings: settings);
         }
       else{

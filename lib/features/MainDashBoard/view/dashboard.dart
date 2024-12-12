@@ -1,13 +1,18 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:wire_sense/common/utils/app_colors.dart';
 import 'package:wire_sense/common/widgets/app_button_widgets.dart';
 import '../../../../../../common/widgets/app_shadow.dart';
 import '../../../../../../common/widgets/plotdata.dart';
 import '../../../../../../common/widgets/text_widgets.dart';
+import '../../../common/Api/api_calling.dart';
 import '../../../common/utils/image_res.dart';
 import '../../../common/widgets/app_text_fields.dart';
+import '../../ReversedProcessing/model/data_model_new.dart';
 
 /// Left side Dashboard drawer
 class Dashboard extends StatefulWidget {
@@ -19,8 +24,8 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
-  String selectedMenu = 'Dashboard';
 
+  String selectedMenu = 'Dashboard';
 
   @override
   Widget build(BuildContext context) {
@@ -185,6 +190,13 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
+class _ChartData {
+  _ChartData(this.year, this.sales);
+
+  final int year;
+  final int sales;
+}
+
 ///DashBoard right side section
 class MainDashBoard extends StatefulWidget {
   const MainDashBoard({super.key});
@@ -194,12 +206,96 @@ class MainDashBoard extends StatefulWidget {
 }
 
 class _MainDashBoardState extends State<MainDashBoard> {
+  List<_ChartData> chartData = [];
+  List<_ChartData> tempData = [];
+  List<_ChartData> presData = [];
+  List<_ChartData> speedData = [];
+  Timer? timer;
+
+  ChartSeriesController? _chartSeriesController;
+  int count = 01;
+
+  // Random instance
+  final Random random = Random();
+
+  void _updateDataSource(Timer timer) {
+    if (chartData == null) return; // Ensure chartData is not null
+
+    final propertyValue = getPropertyAndItsValue(selectedProperty);
+    if (propertyValue.isEmpty) {
+      if (kDebugMode) {
+        print('property value is null');
+      }
+      return;
+    }; // Ensure propertyValue is not empty
+    chartData.add(_ChartData(count, 60+ random.nextInt(5)));
+    tempData.add(_ChartData(count, 400+ random.nextInt(70)));
+    presData.add(_ChartData(count, 2+ random.nextInt(4)));
+    speedData.add(_ChartData(count, 1+ random.nextInt(5)));
+    // final parsedValue = int.tryParse(propertyValue.first);
+    // if (parsedValue == null) {
+    //   if (kDebugMode) {
+    //     print('parsed value is null');
+    //   }
+    //   return;
+    // } // Ensure parsedValue is valid
+    // if(parsedValue!=null || propertyValue.isNotEmpty){
+    //   chartData.add(_ChartData(count, parsedValue));
+    // }
+    // else{
+    //
+    // }
+    if (chartData.length >= 20) { // Ensure chartData has enough items to remove
+      chartData.removeAt(0);
+      tempData.removeAt(0);
+      presData.removeAt(0);
+      speedData.removeAt(0);
+
+      // Remove the first element to maintain size
+      _chartSeriesController?.updateDataSource(
+        addedDataIndexes: [chartData.length - 1],
+        removedDataIndexes: [0],
+      );
+    }
+    count += 1;
+  }
+
+
+  @override
+  void initState() {
+    getData();
+    searchFieldController = TextEditingController();
+    timer = Timer.periodic(const Duration(seconds: 1), _updateDataSource);
+    super.initState();
+  }
+
+  late List<MeasurementData> dashBoardData;
+
+  Future<void> getData() async {
+    dashBoardData = await Api.getDashBoardData();
+    _simulateRealTimeData(dashBoardData);
+    if (kDebugMode) {
+      print('the dashboard has some data as -> ${dashBoardData[0].elongation}');
+    }
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
   List<CastingTemp> temperatureData = [
     CastingTemp('Q1', 3.0),
     CastingTemp('Q2', 4.0),
     CastingTemp('Q3', 2.0),
     CastingTemp('Q4', 3.0),
   ];
+
+  String selectedConductivityValue = '0';
+  String selectedUTSValue = '0';
+  String selectedElongationValue = '0';
+
   bool isProceeded = false;
 
   bool isSelected = false;
@@ -222,151 +318,153 @@ class _MainDashBoardState extends State<MainDashBoard> {
     'UTS',
   ];
 
-  @override
-  void initState() {
-    searchFieldController = TextEditingController();
-    super.initState();
-  }
-
   List<String> getPropertyAndItsValue(String selProp) {
     List<String> ans = [];
     switch (selProp) {
       case 'Conductivity':
-        return ['65 s/m', 'Conductivity'];
+        return [selectedConductivityValue, 'Conductivity'];
       case 'UTS':
-        return ['30 N/m²', 'UTS'];
+        return [selectedUTSValue, 'UTS'];
       case 'Elongation':
-        return ['20 %', 'Elongation'];
+        return [selectedElongationValue, 'Elongation'];
       default:
         return ['Error', 'No case Found'];
     }
   }
 
-  Widget _buildOptionCard(Map<String, dynamic> option,double screenHeight,bool isSelected,double screenWidth,{required Function()? click }) {
+  Widget _buildOptionCard(Map<String, dynamic> option, double screenHeight,
+      bool isSelected, double screenWidth,
+      {required Function()? click}) {
 // todo - CORRECT IT
     return GestureDetector(
       onTap: click!,
-      child: !isSelected?Container(
-        height: screenHeight*0.07,
-        child: Card(
-          color: const Color(0xfff3f0ff),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 7.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Row(
-              children: [
-                // Icon
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: option['color'].withOpacity(0.2),
-                  child: Icon(option['icon'],color: option['color']),
-                ),
-                const SizedBox(width: 16),
-                // Property Name
-                Text(
-                  option['name'],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ):
-      Container(
-        height: screenHeight*0.12,
-        child: Card(
-          color: const Color(0xfff3f0ff),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 5.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Row(
-              children: [
-                // Icon
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: option['color'].withOpacity(0.2),
-                  child: Icon(option['icon'],color: option['color']),
-                ),
-                const SizedBox(width: 16),
-                // Property Name
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      option['name'],
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+      child: !isSelected
+          ? Container(
+              height: screenHeight * 0.07,
+              child: Card(
+                color: const Color(0xfff3f0ff),
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 7.0),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    children: [
+                      // Icon
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: option['color'].withOpacity(0.2),
+                        child: Icon(option['icon'], color: option['color']),
                       ),
-                    ),
-                    const SizedBox(height: 5,),
-                    SizedBox(
-                      width: screenWidth*0.15,
-                      height: screenHeight*0.05,
-                      child: TextField(
-                        obscureText: false,
-                        decoration: InputDecoration(
-                          hintText: 'Input Value',
-                          hintStyle:  TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade500,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Inter",
-                          ),
-                          // suffixIcon: IconButton(
-                          //   icon: const Icon(
-                          //     Icons.input,
-                          //     color: Colors.grey,
-                          //   ), onPressed: () {  },
-                          // ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Colors.white70,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Colors.white70,
-                            ),
-                          ),
+                      const SizedBox(width: 16),
+                      // Property Name
+                      Text(
+                        option['name'],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
                         ),
                       ),
-                    ),
-
-                  ],
+                    ],
+                  ),
                 ),
-              ],
+              ),
+            )
+          : Container(
+              height: screenHeight * 0.12,
+              child: Card(
+                color: const Color(0xfff3f0ff),
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 5.0),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    children: [
+                      // Icon
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: option['color'].withOpacity(0.2),
+                        child: Icon(option['icon'], color: option['color']),
+                      ),
+                      const SizedBox(width: 16),
+                      // Property Name
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            option['name'],
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          SizedBox(
+                            width: screenWidth * 0.15,
+                            height: screenHeight * 0.05,
+                            child: TextField(
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                hintText: 'Input Value',
+                                hintStyle: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade500,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Inter",
+                                ),
+                                // suffixIcon: IconButton(
+                                //   icon: const Icon(
+                                //     Icons.input,
+                                //     color: Colors.grey,
+                                //   ), onPressed: () {  },
+                                // ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-
     );
   }
-  Widget getResultText(double screenHeight){
+
+  Widget getResultText(double screenHeight) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-    const textcustomnormal(
-              fontSize: 20,
-              text: "Suggestions:",
-              color: Color(0xff1B2559),
-              fontfamily: "Inter",
-              fontWeight: FontWeight.w600,
-            ),
-        SizedBox(height: screenHeight*0.05,),
+        const textcustomnormal(
+          fontSize: 20,
+          text: "Suggestions:",
+          color: Color(0xff1B2559),
+          fontfamily: "Inter",
+          fontWeight: FontWeight.w600,
+        ),
+        SizedBox(
+          height: screenHeight * 0.05,
+        ),
         const Center(
           child: textcustomnormal(
             fontSize: 18,
@@ -376,7 +474,9 @@ class _MainDashBoardState extends State<MainDashBoard> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        SizedBox(height: screenHeight*0.02,),
+        SizedBox(
+          height: screenHeight * 0.02,
+        ),
         const Center(
           child: CircleAvatar(
             backgroundColor: AppColors.mainThemeColor,
@@ -396,7 +496,9 @@ class _MainDashBoardState extends State<MainDashBoard> {
                       fontfamily: "Inter",
                       fontWeight: FontWeight.w500,
                     ),
-                    SizedBox(width: 5,),
+                    SizedBox(
+                      width: 5,
+                    ),
                     Icon(Icons.arrow_downward)
                   ],
                 ),
@@ -404,21 +506,34 @@ class _MainDashBoardState extends State<MainDashBoard> {
             ),
           ),
         ),
-              Container(
+        Container(
           alignment: Alignment.bottomRight,
-          child: appButtons(anyWayDoor: (){
-
-          },width: screenHeight*0.1,
-          height: screenHeight*0.05,
-            buttonColor: AppColors.mainThemeColor.withOpacity(0.9),
-            buttonText: 'Approve',
-            buttonTextSize: 14,
-            buttonTextColor:Colors.white
-          ),
+          child: appButtons(
+              anyWayDoor: () {},
+              width: screenHeight * 0.1,
+              height: screenHeight * 0.05,
+              buttonColor: AppColors.mainThemeColor.withOpacity(0.9),
+              buttonText: 'Approve',
+              buttonTextSize: 14,
+              buttonTextColor: Colors.white),
         )
       ],
     );
   }
+
+  void _simulateRealTimeData(List<MeasurementData> newData) async {
+    int index = 0;
+    while (index < newData.length) {
+      await Future.delayed(const Duration(seconds: 2));
+      setState(() {
+        selectedConductivityValue = newData[index].conductivity;
+        selectedUTSValue = newData[index].uts;
+        selectedElongationValue = newData[index].elongation;
+      });
+      index++;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -462,14 +577,15 @@ class _MainDashBoardState extends State<MainDashBoard> {
                 SizedBox(
                   height: screenHeight * 0.03,
                 ),
-                ///Property Row
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     propertyContainer(
                       propertyName: 'CONDUCTIVITY',
-                      propertyValue: '60.01 s/m',
+                      propertyValue: double.tryParse(selectedConductivityValue)!
+                          .toStringAsFixed(2),
                       screenHeight: screenHeight,
                       screenWidth: screenWidth,
                       icon: Icons.trending_up,
@@ -485,7 +601,8 @@ class _MainDashBoardState extends State<MainDashBoard> {
                     ),
                     propertyContainer(
                       propertyName: 'UTS',
-                      propertyValue: '30 N/m²',
+                      propertyValue:
+                          double.tryParse(selectedUTSValue)!.toStringAsFixed(2),
                       screenHeight: screenHeight,
                       screenWidth: screenWidth,
                       icon: Icons.trending_down,
@@ -501,7 +618,8 @@ class _MainDashBoardState extends State<MainDashBoard> {
                     ),
                     propertyContainer(
                       propertyName: 'ELONGATION',
-                      propertyValue: '50 %',
+                      propertyValue: double.tryParse(selectedElongationValue)!
+                          .toStringAsFixed(2),
                       screenHeight: screenHeight,
                       screenWidth: screenWidth,
                       icon: Icons.trending_up,
@@ -565,12 +683,29 @@ class _MainDashBoardState extends State<MainDashBoard> {
                               )
                             ],
                           ),
+                          const SizedBox(
+                            height: 20,
+                          ),
                           //todo - to make a real time chart here...
-                          Container(
-                            margin: const EdgeInsets.only(left: 50),
-                            child: Image.asset(
-                              ImageRes.chartDemo,
-                              fit: BoxFit.fill,
+                          SizedBox(
+                            height: screenHeight * 0.3,
+                            width: screenWidth * 0.4,
+                            child: SfCartesianChart(
+                              series: <LineSeries<_ChartData, int>>[
+                                LineSeries<_ChartData, int>(
+                                  onRendererCreated:
+                                      (ChartSeriesController controller) {
+                                    // Assigning the controller to the _chartSeriesController.
+                                    _chartSeriesController = controller;
+                                  },
+                                  // Binding the chartData to the dataSource of the line series.
+                                  dataSource: chartData,
+                                  xValueMapper: (_ChartData sales, _) =>
+                                      sales.year,
+                                  yValueMapper: (_ChartData sales, _) =>
+                                      sales.sales,
+                                ),
+                              ],
                             ),
                           )
                         ],
@@ -579,7 +714,8 @@ class _MainDashBoardState extends State<MainDashBoard> {
 
                     ///Alert Container
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
                       height: screenHeight * 0.48,
                       width: screenWidth * 0.25,
                       decoration: appBoxDecoration(
@@ -587,275 +723,102 @@ class _MainDashBoardState extends State<MainDashBoard> {
                           borderColor: Colors.transparent,
                           borderWidth: 0.0,
                           color: Colors.white),
-                      child: isProceeded?getResultText(screenHeight):Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const textcustomnormal(
-                                fontSize: 22,
-                                text: "Select Property",
-                                color: Color(0xff1B2559),
-                                fontfamily: "Inter",
-                                fontWeight: FontWeight.w400,
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 5.0),
-                                child: Transform.scale(
-                                  scale: 0.7,
-                                  child: CupertinoSwitch(
-                                    value: _switchValue,
-                                    activeColor: Colors.deepPurpleAccent,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _switchValue = value;
-                                      });
-                                    },
-                                  ),
+                      child: isProceeded
+                          ? getResultText(screenHeight)
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const textcustomnormal(
+                                      fontSize: 22,
+                                      text: "Select Property",
+                                      color: Color(0xff1B2559),
+                                      fontfamily: "Inter",
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: Transform.scale(
+                                        scale: 0.7,
+                                        child: CupertinoSwitch(
+                                          value: _switchValue,
+                                          activeColor: Colors.deepPurpleAccent,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _switchValue = value;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: screenHeight * 0.01,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              _buildOptionCard(options[0], screenHeight, selectedPropertyToChange=='Conductivity', screenWidth, click: (){
-                                setState(() {
-                                  selectedPropertyToChange = "Conductivity";
-                                });
-                              }),
-                              _buildOptionCard(options[1], screenHeight, selectedPropertyToChange=='Elongation', screenWidth, click: (){
-                                setState(() {
-                                  selectedPropertyToChange = "Elongation";
-                                });
-                              }),
-                              _buildOptionCard(options[2], screenHeight, selectedPropertyToChange=='UTS', screenWidth, click: (){
-                                setState(() {
-                                  selectedPropertyToChange = "UTS";
-                                });
-                              })
-                            ]
-                          ),
-                          SizedBox(height: screenHeight*0.04,),
-                          Container(
-                            alignment: Alignment.bottomRight,
-                            child: appButtons(anyWayDoor: (){
-                              setState(() {
-                                isProceeded = true;
-                              });
-                            },width: screenWidth*0.07,
-                            height: screenHeight*0.05,
-                              buttonColor: AppColors.mainThemeColor.withOpacity(0.9),
-                              buttonText: 'Proceed',
-                              buttonTextSize: 14,
-                              buttonTextColor:Colors.white
+                                SizedBox(
+                                  height: screenHeight * 0.01,
+                                ),
+                                Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      _buildOptionCard(
+                                          options[0],
+                                          screenHeight,
+                                          selectedPropertyToChange ==
+                                              'Conductivity',
+                                          screenWidth, click: () {
+                                        setState(() {
+                                          selectedPropertyToChange =
+                                              "Conductivity";
+                                        });
+                                      }),
+                                      _buildOptionCard(
+                                          options[1],
+                                          screenHeight,
+                                          selectedPropertyToChange ==
+                                              'Elongation',
+                                          screenWidth, click: () {
+                                        setState(() {
+                                          selectedPropertyToChange =
+                                              "Elongation";
+                                        });
+                                      }),
+                                      _buildOptionCard(
+                                          options[2],
+                                          screenHeight,
+                                          selectedPropertyToChange == 'UTS',
+                                          screenWidth, click: () {
+                                        setState(() {
+                                          selectedPropertyToChange = "UTS";
+                                        });
+                                      })
+                                    ]),
+                                SizedBox(
+                                  height: screenHeight * 0.04,
+                                ),
+                                Container(
+                                  alignment: Alignment.bottomRight,
+                                  child: appButtons(
+                                      anyWayDoor: () {
+                                        setState(() {
+                                          isProceeded = true;
+                                        });
+                                      },
+                                      width: screenWidth * 0.07,
+                                      height: screenHeight * 0.05,
+                                      buttonColor: AppColors.mainThemeColor
+                                          .withOpacity(0.9),
+                                      buttonText: 'Proceed',
+                                      buttonTextSize: 14,
+                                      buttonTextColor: Colors.white),
+                                )
+                              ],
                             ),
-                          )
-
-                          // child: DropdownButton(
-                          //   // Initial Value
-                          //   value: dropdownvalue,
-                          //
-                          //   // Down Arrow Icon
-                          //   icon: const Icon(Icons.keyboard_arrow_down),
-                          //
-                          //   // Array list of items
-                          //   items: properties.map((String items) {
-                          //     return DropdownMenuItem(
-                          //       value: items,
-                          //       child: Text(items),
-                          //     );
-                          //   }).toList(),
-                          //   // After selecting the desired option,it will
-                          //   // change button value to selected value
-                          //   onChanged: (String? newValue) {
-                          //     setState(() {
-                          //       dropdownvalue = newValue!;
-                          //     });
-                          //   },
-                          // ),
-                          //),
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
-                          //   child: Row(
-                          //     crossAxisAlignment: CrossAxisAlignment.center,
-                          //     children: [
-                          //       Icon(Icons.flash_on,
-                          //           color: Colors.grey.shade500),
-                          //       const SizedBox(
-                          //         width: 15,
-                          //       ),
-                          //       const Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.start,
-                          //         mainAxisAlignment:
-                          //             MainAxisAlignment.spaceBetween,
-                          //         children: [
-                          //           text14normal(
-                          //             text: "Conductivity",
-                          //             fontfamily: "Inter",
-                          //             fontWeight: FontWeight.w500,
-                          //             color:
-                          //                 AppColors.dashBoardPrimaryTextColor,
-                          //           ),
-                          //           textcustomnormal(
-                          //             fontSize: 12,
-                          //             text: "Increase Temperature by 20K",
-                          //             fontfamily: "Poppins",
-                          //             fontWeight: FontWeight.w500,
-                          //             color: Colors.red,
-                          //           )
-                          //         ],
-                          //       ),
-                          //       const Spacer(),
-                          //       Container(
-                          //         padding: const EdgeInsets.all(5),
-                          //         decoration: appBoxDecoration(
-                          //             radius: 5,
-                          //             color:
-                          //                 Colors.greenAccent.withOpacity(0.2),
-                          //             borderColor: Colors.transparent,
-                          //             borderWidth: 0.0),
-                          //         child: Center(
-                          //           child: text14normal(
-                          //             text: '+0.500K',
-                          //             fontfamily: "Inter",
-                          //             fontWeight: FontWeight.w500,
-                          //             color: Colors.greenAccent.shade400,
-                          //           ),
-                          //         ),
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                          // SizedBox(
-                          //   height: screenHeight * 0.03,
-                          // ),
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
-                          //   child: Row(
-                          //     crossAxisAlignment: CrossAxisAlignment.center,
-                          //     children: [
-                          //       Icon(Icons.fitness_center,
-                          //           color: Colors.grey.shade500),
-                          //       const SizedBox(
-                          //         width: 15,
-                          //       ),
-                          //       const Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.start,
-                          //         mainAxisAlignment:
-                          //             MainAxisAlignment.spaceBetween,
-                          //         children: [
-                          //           text14normal(
-                          //             text: "UTS",
-                          //             fontfamily: "Inter",
-                          //             fontWeight: FontWeight.w500,
-                          //             color:
-                          //                 AppColors.dashBoardPrimaryTextColor,
-                          //           ),
-                          //           textcustomnormal(
-                          //             fontSize: 12,
-                          //             text: "Decrease Pressure by 3 ATM",
-                          //             fontfamily: "Poppins",
-                          //             fontWeight: FontWeight.w500,
-                          //             color: Colors.red,
-                          //           )
-                          //         ],
-                          //       ),
-                          //       const Spacer(),
-                          //       Container(
-                          //         padding: const EdgeInsets.all(5),
-                          //         decoration: appBoxDecoration(
-                          //             radius: 5,
-                          //             color: Colors.redAccent.withOpacity(0.2),
-                          //             borderColor: Colors.transparent,
-                          //             borderWidth: 0.0),
-                          //         child: Center(
-                          //           child: text14normal(
-                          //             text: '-0.50 N',
-                          //             fontfamily: "Inter",
-                          //             fontWeight: FontWeight.w500,
-                          //             color: Colors.redAccent.shade400,
-                          //           ),
-                          //         ),
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                          // SizedBox(
-                          //   height: screenHeight * 0.03,
-                          // ),
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
-                          //   child: Row(
-                          //     crossAxisAlignment: CrossAxisAlignment.center,
-                          //     children: [
-                          //       Icon(Icons.expand, color: Colors.grey.shade500),
-                          //       const SizedBox(
-                          //         width: 15,
-                          //       ),
-                          //       const Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.start,
-                          //         mainAxisAlignment:
-                          //             MainAxisAlignment.spaceBetween,
-                          //         children: [
-                          //           text14normal(
-                          //             text: "Elongation",
-                          //             fontfamily: "Inter",
-                          //             fontWeight: FontWeight.w500,
-                          //             color:
-                          //                 AppColors.dashBoardPrimaryTextColor,
-                          //           ),
-                          //           textcustomnormal(
-                          //             fontSize: 12,
-                          //             text: "No change required",
-                          //             fontfamily: "Poppins",
-                          //             fontWeight: FontWeight.w500,
-                          //             color: Colors.greenAccent,
-                          //           )
-                          //         ],
-                          //       ),
-                          //       const Spacer(),
-                          //       Container(
-                          //         padding: const EdgeInsets.all(5),
-                          //         decoration: appBoxDecoration(
-                          //             radius: 5,
-                          //             color:
-                          //                 Colors.greenAccent.withOpacity(0.2),
-                          //             borderColor: Colors.transparent,
-                          //             borderWidth: 0.0),
-                          //         child: Center(
-                          //           child: text14normal(
-                          //             text: '+0.001%',
-                          //             fontfamily: "Inter",
-                          //             fontWeight: FontWeight.w500,
-                          //             color: Colors.greenAccent.shade400,
-                          //           ),
-                          //         ),
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                          // SizedBox(
-                          //   height: screenHeight * 0.065,
-                          // ),
-                          // Container(
-                          //     alignment: Alignment.bottomRight,
-                          //     child: const text16normal(
-                          //       text: "View all ->",
-                          //       fontfamily: "Inter",
-                          //       fontWeight: FontWeight.w600,
-                          //       color: AppColors.mainThemeColor,
-                          //     )),
-                        ],
-                      ),
                     )
                   ],
                 ),
@@ -919,15 +882,36 @@ class _MainDashBoardState extends State<MainDashBoard> {
                             ),
                           ),
                           SizedBox(
-                            height: screenHeight * 0.07,
+                            height: screenHeight * 0.01,
                           ),
-                          Container(
-                            width: double.maxFinite,
-                            child: Image.asset(
-                              'assets/images/demo_plot.png',
-                              fit: BoxFit.fill,
+                          SizedBox(
+                            height: screenHeight * 0.3,
+                            width: screenWidth * 0.3,
+                            child: SfCartesianChart(
+                              series: <LineSeries<_ChartData, int>>[
+                                LineSeries<_ChartData, int>(
+                                  onRendererCreated:
+                                      (ChartSeriesController controller) {
+                                    // Assigning the controller to the _chartSeriesController.
+                                    _chartSeriesController = controller;
+                                  },
+                                  // Binding the chartData to the dataSource of the line series.
+                                  dataSource: tempData,
+                                  xValueMapper: (_ChartData sales, _) =>
+                                      sales.year,
+                                  yValueMapper: (_ChartData sales, _) =>
+                                      sales.sales,
+                                ),
+                              ],
                             ),
                           )
+                          // Container(
+                          //   width: double.maxFinite,
+                          //   child: Image.asset(
+                          //     'assets/images/demo_plot.png',
+                          //     fit: BoxFit.fill,
+                          //   ),
+                          // )
                         ],
                       ),
                     ),
@@ -982,14 +966,27 @@ class _MainDashBoardState extends State<MainDashBoard> {
                             ),
                           ),
                           SizedBox(
-                            height: screenHeight * 0.07,
+                            height: screenHeight * 0.01,
                           ),
-                          Container(
-                            width: double.maxFinite,
-                            child: Image.asset(
-                              'assets/images/demo_plot02.png',
-                              height: screenHeight * 0.23,
-                              fit: BoxFit.cover,
+                          SizedBox(
+                            height: screenHeight * 0.3,
+                            width: screenWidth * 0.3,
+                            child: SfCartesianChart(
+                              series: <LineSeries<_ChartData, int>>[
+                                LineSeries<_ChartData, int>(
+                                  onRendererCreated:
+                                      (ChartSeriesController controller) {
+                                    // Assigning the controller to the _chartSeriesController.
+                                    _chartSeriesController = controller;
+                                  },
+                                  // Binding the chartData to the dataSource of the line series.
+                                  dataSource: presData,
+                                  xValueMapper: (_ChartData sales, _) =>
+                                      sales.year,
+                                  yValueMapper: (_ChartData sales, _) =>
+                                      sales.sales,
+                                ),
+                              ],
                             ),
                           )
                         ],
@@ -1046,13 +1043,27 @@ class _MainDashBoardState extends State<MainDashBoard> {
                             ),
                           ),
                           SizedBox(
-                            height: screenHeight * 0.07,
+                            height: screenHeight * 0.01,
                           ),
-                          Container(
-                            width: double.maxFinite,
-                            child: Image.asset(
-                              'assets/images/demo_plot.png',
-                              fit: BoxFit.fill,
+                          SizedBox(
+                            height: screenHeight * 0.3,
+                            width: screenWidth * 0.3,
+                            child: SfCartesianChart(
+                              series: <LineSeries<_ChartData, int>>[
+                                LineSeries<_ChartData, int>(
+                                  onRendererCreated:
+                                      (ChartSeriesController controller) {
+                                    // Assigning the controller to the _chartSeriesController.
+                                    _chartSeriesController = controller;
+                                  },
+                                  // Binding the chartData to the dataSource of the line series.
+                                  dataSource: chartData,
+                                  xValueMapper: (_ChartData sales, _) =>
+                                      sales.year,
+                                  yValueMapper: (_ChartData sales, _) =>
+                                      sales.sales,
+                                ),
+                              ],
                             ),
                           )
                         ],
@@ -1216,325 +1227,4 @@ class _MainDashBoardState extends State<MainDashBoard> {
       ),
     );
   }
-
-  /// Code of Initial UI
-// Widget _buildRealTimeProcessMonitor({
-//   required String UTS,
-//   required String Elongation,
-//   required String Conductivity,
-//   required double screenHeight,
-//   required double screenWidth,
-// }) {
-//   return Container(
-//     padding: const EdgeInsets.symmetric(horizontal: 35,vertical: 20),
-//     decoration: BoxDecoration(
-//       color: Colors.blue[50],
-//       borderRadius: BorderRadius.circular(15),
-//     ),
-//     child: Row(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Expanded(
-//           flex: 3,
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.center,
-//             children: [
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       const Text(
-//                         'Real-time Process Monitor',
-//                         style: TextStyle(
-//                           fontSize: 22,
-//                           fontWeight: FontWeight.bold,
-//                           color: Colors.blueAccent,
-//                         ),
-//                       ),
-//                       const SizedBox(height: 5),
-//                       Text(
-//                         'Manufacturing in progress',
-//                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-//                       ),
-//                     ],
-//                   ),
-//                   documentsButtons(
-//                       buttonText: "Stop Process",
-//                       buttonColor: Colors.red.shade600,
-//                       buttonTextColor: Colors.white,
-//                       buttonIcon: Icons.pause,
-//                       buttonBorderWidth: 0.0,
-//                       iconColor: Colors.white,
-//                       anyWayDoor: () {}),
-//                 ],
-//               ),
-//               const SizedBox(height: 50),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                 children: [
-//                   _buildProcessDetail(
-//                       'Target UTS', '$UTS Mpa', Icons.handyman),
-//                   const SizedBox(width: 20,),
-//                   _buildProcessDetail(
-//                       'Target Elongation', '$Elongation %', Icons.straighten),
-//                   const SizedBox(width: 20,),
-//                   _buildProcessDetail(
-//                       'Target Conductivity', '$Conductivity S/M', Icons.bolt),
-//                   const SizedBox(width: 20,),
-//                   _buildProcessDetail('Process Time', '03:45:30', Icons.timer),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//         const SizedBox(width: 100,),
-//         Expanded(
-//           flex: 1,
-//             child: Container(
-//                 height: screenHeight*0.35,
-//                 width: screenWidth*0.15,
-//                 padding: const EdgeInsets.all(10),
-//                 decoration: appBoxShadow(radius: 10,color: Colors.white),
-//                 child: Image.asset('assets/images/unipol.png',fit: BoxFit.fill,)))
-//
-//       ],
-//     ),
-//
-//   );
-// }
-//Widget _buildProcessDetail(String label, String value, IconData icon) {
-//   return Column(
-//     children: [
-//       Icon(icon, color: Colors.blueAccent, size: 30),
-//       const SizedBox(height: 5),
-//       Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-//       const SizedBox(height: 5),
-//       Text(value,
-//           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//     ],
-//   );
-// }
-//
-// Widget _buildMonitoringSection(double screenHeight, double screenWidth) {
-//   return Container(
-//     width: screenWidth * 0.7,
-//     height: screenHeight * 0.65,
-//     margin: const EdgeInsets.symmetric(horizontal: 20),
-//     padding: const EdgeInsets.all(10),
-//     child: GridView(
-//       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//           crossAxisCount: 3, mainAxisSpacing: 20, crossAxisSpacing: 20),
-//       children: [
-//         plot(screenHeight, screenWidth),
-//         plot(screenHeight, screenWidth),
-//         plot(screenHeight, screenWidth),
-//         plot(screenHeight, screenWidth),
-//         plot(screenHeight, screenWidth),
-//         plot(screenHeight, screenWidth),
-//       ],
-//     ),
-//   );
-// }
-//
-// Widget _buildLiveAlerts(double screenHeight) {
-//   return Container(
-//     height: screenHeight * 0.65,
-//     margin: const EdgeInsets.symmetric(horizontal: 20),
-//     decoration: BoxDecoration(
-//       color: Colors.white,
-//       borderRadius: BorderRadius.circular(15),
-//       boxShadow: [
-//         BoxShadow(
-//           color: Colors.grey.withOpacity(0.3),
-//           spreadRadius: 2,
-//           blurRadius: 5,
-//         ),
-//       ],
-//     ),
-//     child: Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         const Padding(
-//           padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
-//           child: Text(
-//             'Live Alerts',
-//             style: TextStyle(
-//                 fontSize: 18,
-//                 fontWeight: FontWeight.bold,
-//                 color: Colors.orange),
-//           ),
-//         ),
-//         Container(
-//           height: screenHeight * 0.58,
-//           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-//           child: SingleChildScrollView(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.center,
-//               children: [
-//                 _buildAlert(
-//                     'Temperature increased by 5°C - Adjusting pressure',
-//                     Colors.red),
-//                 _buildAlert(
-//                     'Speed optimization in progress,who cares what is in progress',
-//                     Colors.blue),
-//                 _buildAlert(
-//                     'Parameters stabilized at target values, the value are typically 123',
-//                     Colors.green),
-//                 _buildAlert(
-//                     'Parameters stabilized at target values, the value are typically 123',
-//                     Colors.redAccent),
-//                 _buildAlert(
-//                     'Parameters stabilized at target values, the value are typically 123',
-//                     Colors.redAccent),
-//               ],
-//             ),
-//           ),
-//         )
-//       ],
-//     ),
-//   );
-// }
-//
-// Widget _buildAlert(String message, Color color) {
-//   return Container(
-//     margin: const EdgeInsets.only(bottom: 10),
-//     padding: const EdgeInsets.all(10),
-//     decoration: BoxDecoration(
-//       color: color.withOpacity(0.1),
-//       borderRadius: BorderRadius.circular(10),
-//     ),
-//     child: Row(
-//       children: [
-//         Icon(Icons.info_outline, color: color, size: 20),
-//         const SizedBox(width: 10),
-//         Expanded(
-//           child: Text(
-//             message,
-//             style: TextStyle(color: color, fontSize: 14),
-//           ),
-//         ),
-//       ],
-//     ),
-//   );
-// }
-//
-// Widget _buildStats() {
-//   return Row(
-//     mainAxisAlignment: MainAxisAlignment.spaceAround,
-//     children: [
-//       _buildStatCard('Production Count', '1200', Colors.blue),
-//       _buildStatCard('Avg. Temperature', '350°C', Colors.red),
-//       _buildStatCard('Avg. Pressure', '2.5 atm', Colors.green),
-//     ],
-//   );
-// }
-//
-// Widget _buildStatCard(String label, String value, Color color) {
-//   return Container(
-//     padding: const EdgeInsets.all(20),
-//     decoration: BoxDecoration(
-//       color: color.withOpacity(0.1),
-//       borderRadius: BorderRadius.circular(15),
-//     ),
-//     child: Column(
-//       children: [
-//         Text(
-//           value,
-//           style: TextStyle(
-//             fontSize: 24,
-//             fontWeight: FontWeight.bold,
-//             color: color,
-//           ),
-//         ),
-//         const SizedBox(height: 10),
-//         Text(
-//           label,
-//           style: TextStyle(
-//             fontSize: 14,
-//             color: Colors.grey[700],
-//           ),
-//         ),
-//       ],
-//     ),
-//   );
-// }
-//
-// Widget _buildCorrelationMatrix() {
-//   return Container(
-//     margin: const EdgeInsets.all(20),
-//     padding: const EdgeInsets.all(20),
-//     decoration: BoxDecoration(
-//       color: Colors.grey[200],
-//       borderRadius: BorderRadius.circular(15),
-//     ),
-//     child: const Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text(
-//           'Correlation Matrix',
-//           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//         ),
-//         SizedBox(height: 20),
-//         // Image.asset(
-//         //   'assets/images/correlation_matrix.png',
-//         //   // Replace with your image path
-//         //   height: 200,
-//         // ),
-//       ],
-//     ),
-//   );
-// }
 }
-
-/// Plot Data and Graphs
-// Widget plot(double screenHeight, double screenWidth) {
-//   return Container(
-//     decoration: appBoxDecoration(
-//         color: Colors.white,
-//         borderColor: Colors.black12,
-//         borderWidth: 1,
-//         radius: 10),
-//     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-//     child: Column(
-//       crossAxisAlignment: CrossAxisAlignment.center,
-//       children: [
-//         const text20normal(
-//           text: 'Casting Temperature',
-//           fontfamily: "Poppins",
-//         ),
-//         dashboardChart(castingTempData: temperatureData)
-//       ],
-//     ),
-//   );
-// }
-//
-// Widget dashboardChart({required List<CastingTemp> castingTempData}) {
-//   return Container(
-//     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-//     height: 300,
-//     child: SfCartesianChart(
-//         primaryXAxis: const CategoryAxis(
-//           majorGridLines: MajorGridLines(width: 0.0),
-//         ),
-//         primaryYAxis: const NumericAxis(
-//           title: AxisTitle(text: "Temperature"),
-//           minimum: 1,
-//           maximum: 5,
-//           interval: 1,
-//           majorGridLines: MajorGridLines(width: 0.4),
-//         ),
-//         tooltipBehavior: TooltipBehavior(
-//           enable: true,
-//         ),
-//         series: <CartesianSeries>[
-//           // Renders line chart
-//           LineSeries<CastingTemp, String>(
-//               name: 'Temperature',
-//               dataSource: castingTempData,
-//               xValueMapper: (CastingTemp data, _) => data.quarter,
-//               yValueMapper: (CastingTemp data, _) => data.temp)
-//         ]),
-//   );
-// }
