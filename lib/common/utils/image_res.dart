@@ -14,6 +14,9 @@ class ImageRes {
 
   static const String wireSenseElectro = "$_imageBase/wiresense_electro.png";
 
+  static const String forward_model_icon = "$_imageBase/forward_model.jpg";
+  static const String reverse_model_icon = "$_imageBase/reverse_model.jpg";
+
 
 
   ///icon sources

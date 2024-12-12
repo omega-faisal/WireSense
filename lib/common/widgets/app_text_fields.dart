@@ -83,6 +83,7 @@ Widget textLoginBoxWithDimensions(
     void Function(String value)? func,
     String? Function(String value)? validator,
     double width = 260,
+
       TextInputType? keyboardType = TextInputType.multiline,
     IconData icon = Icons.type_specimen,
     AutovalidateMode? validateMode}) {

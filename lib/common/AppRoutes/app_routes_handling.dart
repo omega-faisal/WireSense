@@ -18,17 +18,17 @@ class appPages {
       RouteEntity(
           path: AppRoutes.DASHBOARD,
           page: const ProviderScope(child: Dashboard())),
-      RouteEntity(
-          path: AppRoutes.WEBSOCKET,
-          page: const ProviderScope(child: WebscTest())),
+      // RouteEntity(
+      //     path: AppRoutes.WEBSOCKET,
+      //     page: const ProviderScope(child: WebscTest())),
       RouteEntity(
           path: AppRoutes.OPTIONS,
           page: ProviderScope(child: FancyAuthScreen())),
       RouteEntity(
-          path: AppRoutes.PREDICTPROP,
-          page: const ProviderScope(child: ParameterSliders())),
+          path: AppRoutes.INPUTPARAMETER,
+          page: const ProviderScope(child: InputParametersScreen())),
       RouteEntity(
-          path: AppRoutes.PREDICTPROPRES,
+          path: AppRoutes.PREDICTPROPRESTEST,
           page: const ProviderScope(child: PropertyResultScreen())),
       RouteEntity(
           path: AppRoutes.LOGIN,

@@ -36,6 +36,11 @@ dependencies:
   riverpod_annotation: ^2.3.5
   syncfusion_flutter_charts: ^27.2.2
   web_socket_channel: ^3.0.1
+  http: ^1.2.1
+  dio: ^5.7.0
+  csv: ^5.0.1
+  fluttertoast: ^8.2.8
+  path_provider: ^2.1.0
 
 
 
@@ -70,6 +75,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/fonts/
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

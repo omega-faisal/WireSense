@@ -1,8 +1,8 @@
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:wire_sense/common/utils/app_colors.dart';
+import 'package:wire_sense/common/widgets/app_button_widgets.dart';
 import '../../../../../../common/widgets/app_shadow.dart';
 import '../../../../../../common/widgets/plotdata.dart';
 import '../../../../../../common/widgets/text_widgets.dart';
@@ -20,7 +20,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   String selectedMenu = 'Dashboard';
-  String selectedProperty = 'Conductivity';
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,29 +118,29 @@ class _DashboardState extends State<Dashboard> {
                     leading: Icon(
                       size: screenHeight * 0.03,
                       Icons.download,
-                      color: selectedMenu == 'Download Report'
+                      color: selectedMenu == 'Predict Physical Prop'
                           ? Colors.white
                           : const Color(0xffA3AED0),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    tileColor: selectedMenu == 'Download Report'
+                    tileColor: selectedMenu == 'Predict Physical Prop'
                         ? const Color(0xff562efd)
                         : Colors.white70,
                     title: textcustomnormal(
-                      text: 'Download Report',
+                      text: 'Predict Prop',
                       fontSize: 16,
                       fontfamily: "Inter",
                       fontWeight: FontWeight.w400,
-                      color: selectedMenu == 'Download Report'
+                      color: selectedMenu == 'Predict Physical Prop'
                           ? Colors.white
                           : const Color(0xffA3AED0),
                     ),
                     onTap: () {
                       // _key.currentState?.closeDrawer();
                       setState(() {
-                        selectedMenu = 'Download Report';
+                        selectedMenu = 'Predict Physical Prop';
                       });
                     },
                   ),
@@ -175,8 +175,8 @@ class _DashboardState extends State<Dashboard> {
 
   Widget getContentWidget(String menu) {
     switch (menu) {
-      case 'Download Report':
-        return const Center(child: Text('Download Report'));
+      case 'Predict Physical Prop':
+        return const Center(child: Text('Predict Physical Prop'));
       case 'Dashboard':
         return const Center(child: MainDashBoard());
       default:
@@ -200,26 +200,224 @@ class _MainDashBoardState extends State<MainDashBoard> {
     CastingTemp('Q3', 2.0),
     CastingTemp('Q4', 3.0),
   ];
+  bool isProceeded = false;
+
+  bool isSelected = false;
+  final List<Map<String, dynamic>> options = [
+    {"icon": Icons.bolt, "name": "Conductivity s/m", "color": Colors.blue},
+    {"icon": Icons.construction, "name": "UTS Mpa", "color": Colors.orange},
+    {"icon": Icons.expand, "name": "Elongation %", "color": Colors.green},
+  ];
   late TextEditingController searchFieldController;
   bool _switchValue = false;
   String selectedProperty = 'Conductivity';
+  String selectedPropertyToChange = 'Conductivity';
+
+  String dropdownvalue = 'Elongation';
+
+  // List of items in our dropdown menu
+  var properties = [
+    'Elongation',
+    'Conductivity',
+    'UTS',
+  ];
+
   @override
   void initState() {
     searchFieldController = TextEditingController();
     super.initState();
   }
- List<String> getPropertyAndItsValue(String selProp){
-    List<String> ans=[];
+
+  List<String> getPropertyAndItsValue(String selProp) {
+    List<String> ans = [];
     switch (selProp) {
       case 'Conductivity':
-        return  ['65 s/m','Conductivity'];
+        return ['65 s/m', 'Conductivity'];
       case 'UTS':
-        return  ['30 N/m²','UTS'];
+        return ['30 N/m²', 'UTS'];
       case 'Elongation':
-        return  ['20 %','Elongation'];
+        return ['20 %', 'Elongation'];
       default:
-        return  ['Error','No case Found'];
+        return ['Error', 'No case Found'];
     }
+  }
+
+  Widget _buildOptionCard(Map<String, dynamic> option,double screenHeight,bool isSelected,double screenWidth,{required Function()? click }) {
+// todo - CORRECT IT
+    return GestureDetector(
+      onTap: click!,
+      child: !isSelected?Container(
+        height: screenHeight*0.07,
+        child: Card(
+          color: const Color(0xfff3f0ff),
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(vertical: 7.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Row(
+              children: [
+                // Icon
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: option['color'].withOpacity(0.2),
+                  child: Icon(option['icon'],color: option['color']),
+                ),
+                const SizedBox(width: 16),
+                // Property Name
+                Text(
+                  option['name'],
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ):
+      Container(
+        height: screenHeight*0.12,
+        child: Card(
+          color: const Color(0xfff3f0ff),
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(vertical: 5.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Row(
+              children: [
+                // Icon
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: option['color'].withOpacity(0.2),
+                  child: Icon(option['icon'],color: option['color']),
+                ),
+                const SizedBox(width: 16),
+                // Property Name
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      option['name'],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 5,),
+                    SizedBox(
+                      width: screenWidth*0.15,
+                      height: screenHeight*0.05,
+                      child: TextField(
+                        obscureText: false,
+                        decoration: InputDecoration(
+                          hintText: 'Input Value',
+                          hintStyle:  TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Inter",
+                          ),
+                          // suffixIcon: IconButton(
+                          //   icon: const Icon(
+                          //     Icons.input,
+                          //     color: Colors.grey,
+                          //   ), onPressed: () {  },
+                          // ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Colors.white70,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+
+    );
+  }
+  Widget getResultText(double screenHeight){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+    const textcustomnormal(
+              fontSize: 20,
+              text: "Suggestions:",
+              color: Color(0xff1B2559),
+              fontfamily: "Inter",
+              fontWeight: FontWeight.w600,
+            ),
+        SizedBox(height: screenHeight*0.05,),
+        const Center(
+          child: textcustomnormal(
+            fontSize: 18,
+            text: "Casting Temperature",
+            color: Color(0xff1B2559),
+            fontfamily: "Inter",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: screenHeight*0.02,),
+        const Center(
+          child: CircleAvatar(
+            backgroundColor: AppColors.mainThemeColor,
+            radius: 80,
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    textcustomnormal(
+                      fontSize: 16,
+                      text: "12 °C",
+                      color: Color(0xff1B2559),
+                      fontfamily: "Inter",
+                      fontWeight: FontWeight.w500,
+                    ),
+                    SizedBox(width: 5,),
+                    Icon(Icons.arrow_downward)
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+              Container(
+          alignment: Alignment.bottomRight,
+          child: appButtons(anyWayDoor: (){
+
+          },width: screenHeight*0.1,
+          height: screenHeight*0.05,
+            buttonColor: AppColors.mainThemeColor.withOpacity(0.9),
+            buttonText: 'Approve',
+            buttonTextSize: 14,
+            buttonTextColor:Colors.white
+          ),
+        )
+      ],
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -264,7 +462,6 @@ class _MainDashBoardState extends State<MainDashBoard> {
                 SizedBox(
                   height: screenHeight * 0.03,
                 ),
-                // todo - to check logic which container is selected
                 ///Property Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -276,11 +473,12 @@ class _MainDashBoardState extends State<MainDashBoard> {
                       screenHeight: screenHeight,
                       screenWidth: screenWidth,
                       icon: Icons.trending_up,
-                      isSelected: selectedProperty=='Conductivity', click: () {
+                      isSelected: selectedProperty == 'Conductivity',
+                      click: () {
                         setState(() {
-                          selectedProperty='Conductivity';
+                          selectedProperty = 'Conductivity';
                         });
-                    },
+                      },
                     ),
                     SizedBox(
                       width: screenWidth * 0.015,
@@ -290,11 +488,13 @@ class _MainDashBoardState extends State<MainDashBoard> {
                       propertyValue: '30 N/m²',
                       screenHeight: screenHeight,
                       screenWidth: screenWidth,
-                      icon: Icons.trending_down, isSelected: selectedProperty=='UTS', click: () {
+                      icon: Icons.trending_down,
+                      isSelected: selectedProperty == 'UTS',
+                      click: () {
                         setState(() {
-                          selectedProperty='UTS';
+                          selectedProperty = 'UTS';
                         });
-                        },
+                      },
                     ),
                     SizedBox(
                       width: screenWidth * 0.015,
@@ -304,11 +504,13 @@ class _MainDashBoardState extends State<MainDashBoard> {
                       propertyValue: '50 %',
                       screenHeight: screenHeight,
                       screenWidth: screenWidth,
-                      icon: Icons.trending_up, isSelected: selectedProperty=='Elongation', click: () {
+                      icon: Icons.trending_up,
+                      isSelected: selectedProperty == 'Elongation',
+                      click: () {
                         setState(() {
-                          selectedProperty='Elongation';
+                          selectedProperty = 'Elongation';
                         });
-                    },
+                      },
                     ),
                   ],
                 ),
@@ -338,7 +540,8 @@ class _MainDashBoardState extends State<MainDashBoard> {
                             color: Colors.black,
                             fontfamily: "Poppins",
                             fontWeight: FontWeight.w500,
-                            text: getPropertyAndItsValue(selectedProperty).first,
+                            text:
+                                getPropertyAndItsValue(selectedProperty).first,
                           ),
                           Row(
                             children: [
@@ -346,7 +549,8 @@ class _MainDashBoardState extends State<MainDashBoard> {
                                 fontWeight: FontWeight.w400,
                                 fontfamily: "Poppins",
                                 color: AppColors.dashBoardSecondaryTextColor,
-                                text: getPropertyAndItsValue(selectedProperty).last,
+                                text: getPropertyAndItsValue(selectedProperty)
+                                    .last,
                               ),
                               const Icon(
                                 Icons.arrow_drop_up_sharp,
@@ -375,7 +579,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
 
                     ///Alert Container
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 5),
                       height: screenHeight * 0.48,
                       width: screenWidth * 0.25,
                       decoration: appBoxDecoration(
@@ -383,7 +587,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
                           borderColor: Colors.transparent,
                           borderWidth: 0.0,
                           color: Colors.white),
-                      child: Column(
+                      child: isProceeded?getResultText(screenHeight):Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
@@ -391,7 +595,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
                             children: [
                               const textcustomnormal(
                                 fontSize: 22,
-                                text: "Alerts",
+                                text: "Select Property",
                                 color: Color(0xff1B2559),
                                 fontfamily: "Inter",
                                 fontWeight: FontWeight.w400,
@@ -417,179 +621,239 @@ class _MainDashBoardState extends State<MainDashBoard> {
                             ],
                           ),
                           SizedBox(
-                            height: screenHeight * 0.03,
+                            height: screenHeight * 0.01,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(Icons.flash_on,
-                                    color: Colors.grey.shade500),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    text14normal(
-                                      text: "Conductivity",
-                                      fontfamily: "Inter",
-                                      fontWeight: FontWeight.w500,
-                                      color:
-                                          AppColors.dashBoardPrimaryTextColor,
-                                    ),
-                                    textcustomnormal(
-                                      fontSize: 12,
-                                      text: "Increase Temperature by 20K",
-                                      fontfamily: "Poppins",
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.red,
-                                    )
-                                  ],
-                                ),
-                                const Spacer(),
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: appBoxDecoration(
-                                      radius: 5,
-                                      color:
-                                          Colors.greenAccent.withOpacity(0.2),
-                                      borderColor: Colors.transparent,
-                                      borderWidth: 0.0),
-                                  child: Center(
-                                    child: text14normal(
-                                      text: '+0.500K',
-                                      fontfamily: "Inter",
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.greenAccent.shade400,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              _buildOptionCard(options[0], screenHeight, selectedPropertyToChange=='Conductivity', screenWidth, click: (){
+                                setState(() {
+                                  selectedPropertyToChange = "Conductivity";
+                                });
+                              }),
+                              _buildOptionCard(options[1], screenHeight, selectedPropertyToChange=='Elongation', screenWidth, click: (){
+                                setState(() {
+                                  selectedPropertyToChange = "Elongation";
+                                });
+                              }),
+                              _buildOptionCard(options[2], screenHeight, selectedPropertyToChange=='UTS', screenWidth, click: (){
+                                setState(() {
+                                  selectedPropertyToChange = "UTS";
+                                });
+                              })
+                            ]
                           ),
-                          SizedBox(
-                            height: screenHeight * 0.03,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(Icons.fitness_center,
-                                    color: Colors.grey.shade500),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    text14normal(
-                                      text: "UTS",
-                                      fontfamily: "Inter",
-                                      fontWeight: FontWeight.w500,
-                                      color:
-                                          AppColors.dashBoardPrimaryTextColor,
-                                    ),
-                                    textcustomnormal(
-                                      fontSize: 12,
-                                      text: "Decrease Pressure by 3 ATM",
-                                      fontfamily: "Poppins",
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.red,
-                                    )
-                                  ],
-                                ),
-                                const Spacer(),
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: appBoxDecoration(
-                                      radius: 5,
-                                      color: Colors.redAccent.withOpacity(0.2),
-                                      borderColor: Colors.transparent,
-                                      borderWidth: 0.0),
-                                  child: Center(
-                                    child: text14normal(
-                                      text: '-0.50 N',
-                                      fontfamily: "Inter",
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.redAccent.shade400,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: screenHeight * 0.03,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(Icons.expand, color: Colors.grey.shade500),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    text14normal(
-                                      text: "Elongation",
-                                      fontfamily: "Inter",
-                                      fontWeight: FontWeight.w500,
-                                      color:
-                                          AppColors.dashBoardPrimaryTextColor,
-                                    ),
-                                    textcustomnormal(
-                                      fontSize: 12,
-                                      text: "No change required",
-                                      fontfamily: "Poppins",
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.greenAccent,
-                                    )
-                                  ],
-                                ),
-                                const Spacer(),
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: appBoxDecoration(
-                                      radius: 5,
-                                      color:
-                                          Colors.greenAccent.withOpacity(0.2),
-                                      borderColor: Colors.transparent,
-                                      borderWidth: 0.0),
-                                  child: Center(
-                                    child: text14normal(
-                                      text: '+0.001%',
-                                      fontfamily: "Inter",
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.greenAccent.shade400,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: screenHeight * 0.065,
-                          ),
+                          SizedBox(height: screenHeight*0.04,),
                           Container(
-                              alignment: Alignment.bottomRight,
-                              child: const text16normal(
-                                text: "View all ->",
-                                fontfamily: "Inter",
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.mainThemeColor,
-                              )),
+                            alignment: Alignment.bottomRight,
+                            child: appButtons(anyWayDoor: (){
+                              setState(() {
+                                isProceeded = true;
+                              });
+                            },width: screenWidth*0.07,
+                            height: screenHeight*0.05,
+                              buttonColor: AppColors.mainThemeColor.withOpacity(0.9),
+                              buttonText: 'Proceed',
+                              buttonTextSize: 14,
+                              buttonTextColor:Colors.white
+                            ),
+                          )
+
+                          // child: DropdownButton(
+                          //   // Initial Value
+                          //   value: dropdownvalue,
+                          //
+                          //   // Down Arrow Icon
+                          //   icon: const Icon(Icons.keyboard_arrow_down),
+                          //
+                          //   // Array list of items
+                          //   items: properties.map((String items) {
+                          //     return DropdownMenuItem(
+                          //       value: items,
+                          //       child: Text(items),
+                          //     );
+                          //   }).toList(),
+                          //   // After selecting the desired option,it will
+                          //   // change button value to selected value
+                          //   onChanged: (String? newValue) {
+                          //     setState(() {
+                          //       dropdownvalue = newValue!;
+                          //     });
+                          //   },
+                          // ),
+                          //),
+                          // Padding(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                          //   child: Row(
+                          //     crossAxisAlignment: CrossAxisAlignment.center,
+                          //     children: [
+                          //       Icon(Icons.flash_on,
+                          //           color: Colors.grey.shade500),
+                          //       const SizedBox(
+                          //         width: 15,
+                          //       ),
+                          //       const Column(
+                          //         crossAxisAlignment: CrossAxisAlignment.start,
+                          //         mainAxisAlignment:
+                          //             MainAxisAlignment.spaceBetween,
+                          //         children: [
+                          //           text14normal(
+                          //             text: "Conductivity",
+                          //             fontfamily: "Inter",
+                          //             fontWeight: FontWeight.w500,
+                          //             color:
+                          //                 AppColors.dashBoardPrimaryTextColor,
+                          //           ),
+                          //           textcustomnormal(
+                          //             fontSize: 12,
+                          //             text: "Increase Temperature by 20K",
+                          //             fontfamily: "Poppins",
+                          //             fontWeight: FontWeight.w500,
+                          //             color: Colors.red,
+                          //           )
+                          //         ],
+                          //       ),
+                          //       const Spacer(),
+                          //       Container(
+                          //         padding: const EdgeInsets.all(5),
+                          //         decoration: appBoxDecoration(
+                          //             radius: 5,
+                          //             color:
+                          //                 Colors.greenAccent.withOpacity(0.2),
+                          //             borderColor: Colors.transparent,
+                          //             borderWidth: 0.0),
+                          //         child: Center(
+                          //           child: text14normal(
+                          //             text: '+0.500K',
+                          //             fontfamily: "Inter",
+                          //             fontWeight: FontWeight.w500,
+                          //             color: Colors.greenAccent.shade400,
+                          //           ),
+                          //         ),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height: screenHeight * 0.03,
+                          // ),
+                          // Padding(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                          //   child: Row(
+                          //     crossAxisAlignment: CrossAxisAlignment.center,
+                          //     children: [
+                          //       Icon(Icons.fitness_center,
+                          //           color: Colors.grey.shade500),
+                          //       const SizedBox(
+                          //         width: 15,
+                          //       ),
+                          //       const Column(
+                          //         crossAxisAlignment: CrossAxisAlignment.start,
+                          //         mainAxisAlignment:
+                          //             MainAxisAlignment.spaceBetween,
+                          //         children: [
+                          //           text14normal(
+                          //             text: "UTS",
+                          //             fontfamily: "Inter",
+                          //             fontWeight: FontWeight.w500,
+                          //             color:
+                          //                 AppColors.dashBoardPrimaryTextColor,
+                          //           ),
+                          //           textcustomnormal(
+                          //             fontSize: 12,
+                          //             text: "Decrease Pressure by 3 ATM",
+                          //             fontfamily: "Poppins",
+                          //             fontWeight: FontWeight.w500,
+                          //             color: Colors.red,
+                          //           )
+                          //         ],
+                          //       ),
+                          //       const Spacer(),
+                          //       Container(
+                          //         padding: const EdgeInsets.all(5),
+                          //         decoration: appBoxDecoration(
+                          //             radius: 5,
+                          //             color: Colors.redAccent.withOpacity(0.2),
+                          //             borderColor: Colors.transparent,
+                          //             borderWidth: 0.0),
+                          //         child: Center(
+                          //           child: text14normal(
+                          //             text: '-0.50 N',
+                          //             fontfamily: "Inter",
+                          //             fontWeight: FontWeight.w500,
+                          //             color: Colors.redAccent.shade400,
+                          //           ),
+                          //         ),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height: screenHeight * 0.03,
+                          // ),
+                          // Padding(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                          //   child: Row(
+                          //     crossAxisAlignment: CrossAxisAlignment.center,
+                          //     children: [
+                          //       Icon(Icons.expand, color: Colors.grey.shade500),
+                          //       const SizedBox(
+                          //         width: 15,
+                          //       ),
+                          //       const Column(
+                          //         crossAxisAlignment: CrossAxisAlignment.start,
+                          //         mainAxisAlignment:
+                          //             MainAxisAlignment.spaceBetween,
+                          //         children: [
+                          //           text14normal(
+                          //             text: "Elongation",
+                          //             fontfamily: "Inter",
+                          //             fontWeight: FontWeight.w500,
+                          //             color:
+                          //                 AppColors.dashBoardPrimaryTextColor,
+                          //           ),
+                          //           textcustomnormal(
+                          //             fontSize: 12,
+                          //             text: "No change required",
+                          //             fontfamily: "Poppins",
+                          //             fontWeight: FontWeight.w500,
+                          //             color: Colors.greenAccent,
+                          //           )
+                          //         ],
+                          //       ),
+                          //       const Spacer(),
+                          //       Container(
+                          //         padding: const EdgeInsets.all(5),
+                          //         decoration: appBoxDecoration(
+                          //             radius: 5,
+                          //             color:
+                          //                 Colors.greenAccent.withOpacity(0.2),
+                          //             borderColor: Colors.transparent,
+                          //             borderWidth: 0.0),
+                          //         child: Center(
+                          //           child: text14normal(
+                          //             text: '+0.001%',
+                          //             fontfamily: "Inter",
+                          //             fontWeight: FontWeight.w500,
+                          //             color: Colors.greenAccent.shade400,
+                          //           ),
+                          //         ),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height: screenHeight * 0.065,
+                          // ),
+                          // Container(
+                          //     alignment: Alignment.bottomRight,
+                          //     child: const text16normal(
+                          //       text: "View all ->",
+                          //       fontfamily: "Inter",
+                          //       fontWeight: FontWeight.w600,
+                          //       color: AppColors.mainThemeColor,
+                          //     )),
                         ],
                       ),
                     )
@@ -654,7 +918,9 @@ class _MainDashBoardState extends State<MainDashBoard> {
                               ),
                             ),
                           ),
-                          SizedBox(height: screenHeight*0.07,),
+                          SizedBox(
+                            height: screenHeight * 0.07,
+                          ),
                           Container(
                             width: double.maxFinite,
                             child: Image.asset(
@@ -715,18 +981,21 @@ class _MainDashBoardState extends State<MainDashBoard> {
                               ),
                             ),
                           ),
-                          SizedBox(height: screenHeight*0.07,),
+                          SizedBox(
+                            height: screenHeight * 0.07,
+                          ),
                           Container(
                             width: double.maxFinite,
                             child: Image.asset(
                               'assets/images/demo_plot02.png',
-                              height: screenHeight*0.23,
+                              height: screenHeight * 0.23,
                               fit: BoxFit.cover,
                             ),
                           )
                         ],
                       ),
-                    ),Container(
+                    ),
+                    Container(
                       height: screenHeight * 0.48,
                       width: screenWidth * 0.23,
                       decoration: appBoxDecoration(
@@ -776,7 +1045,9 @@ class _MainDashBoardState extends State<MainDashBoard> {
                               ),
                             ),
                           ),
-                          SizedBox(height: screenHeight*0.07,),
+                          SizedBox(
+                            height: screenHeight * 0.07,
+                          ),
                           Container(
                             width: double.maxFinite,
                             child: Image.asset(
@@ -801,97 +1072,98 @@ class _MainDashBoardState extends State<MainDashBoard> {
       required double screenHeight,
       required double screenWidth,
       required IconData icon,
-      required  bool isSelected,
-        required Function()? click
-      }) {
-    return isSelected?Container(
-      width: screenWidth * 0.18,
-      height: screenHeight * 0.15,
-      padding: const EdgeInsets.all(20),
-      decoration: appBoxDecorationWithGradient(
-          color: AppColors.mainThemeColor,
-          borderColor: Colors.transparent,
-          borderWidth: 0.0,
-          radius: 20),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                text20normal(
-                  text: propertyName,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w400,
-                  fontfamily: "Poppins",
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                textcustomnormal(
-                  fontSize: 22,
-                  text: propertyValue,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontfamily: "Poppins",
-                )
-              ],
-            ),
-            Icon(
-              icon,
-              size: screenHeight * 0.05,
-            )
-          ],
-        ),
-      ),
-    ):GestureDetector(
-      onTap: click!,
-      child: Container(
-        width: screenWidth * 0.18,
-        height: screenHeight * 0.15,
-        padding: const EdgeInsets.all(20),
-        decoration: appBoxDecoration(
-            color: Colors.white,
-            borderColor: Colors.transparent,
-            borderWidth: 0.0,
-            radius: 20),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      required bool isSelected,
+      required Function()? click}) {
+    return isSelected
+        ? Container(
+            width: screenWidth * 0.18,
+            height: screenHeight * 0.15,
+            padding: const EdgeInsets.all(20),
+            decoration: appBoxDecorationWithGradient(
+                color: AppColors.mainThemeColor,
+                borderColor: Colors.transparent,
+                borderWidth: 0.0,
+                radius: 20),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  text20normal(
-                    text: propertyName,
-                    color: AppColors.dashBoardSecondaryTextColor,
-                    fontWeight: FontWeight.w400,
-                    fontfamily: "Poppins",
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      text20normal(
+                        text: propertyName,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400,
+                        fontfamily: "Poppins",
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      textcustomnormal(
+                        fontSize: 22,
+                        text: propertyValue,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontfamily: "Poppins",
+                      )
+                    ],
                   ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  textcustomnormal(
-                    fontSize: 22,
-                    text: propertyValue,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                    fontfamily: "Poppins",
+                  Icon(
+                    icon,
+                    size: screenHeight * 0.05,
                   )
                 ],
               ),
-              Icon(
-                icon,
-                size: screenHeight * 0.05,
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          )
+        : GestureDetector(
+            onTap: click!,
+            child: Container(
+              width: screenWidth * 0.18,
+              height: screenHeight * 0.15,
+              padding: const EdgeInsets.all(20),
+              decoration: appBoxDecoration(
+                  color: Colors.white,
+                  borderColor: Colors.transparent,
+                  borderWidth: 0.0,
+                  radius: 20),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        text20normal(
+                          text: propertyName,
+                          color: AppColors.dashBoardSecondaryTextColor,
+                          fontWeight: FontWeight.w400,
+                          fontfamily: "Poppins",
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        textcustomnormal(
+                          fontSize: 22,
+                          text: propertyValue,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                          fontfamily: "Poppins",
+                        )
+                      ],
+                    ),
+                    Icon(
+                      icon,
+                      size: screenHeight * 0.05,
+                    )
+                  ],
+                ),
+              ),
+            ),
+          );
   }
 
   Widget notSelectedPropertyContainer(

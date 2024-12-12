@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wire_sense/common/Api/api_calling.dart';
 import '../../../main.dart';
 
 class ControlCenterPage extends StatelessWidget {
@@ -21,8 +20,24 @@ class ControlCenterPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/letter-w 1.png'),
+                  Text(
+                    "ireSense",
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF2074f2),
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 40,),
               const Text(
-                'Wire Manufacturing Control Center',
+                'Aluminium Wire Rod Physical Properties',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -62,17 +77,16 @@ class ControlCenterPage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: () async {
-                  Api.getProperties();
-                  //navKey.currentState?.pushNamed("/login");
-                  },
+                onPressed: () {
+                  navKey.currentState?.pushNamed("/dashboard");
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 ),
                 child: const Text(
-                  'Initialize Manufacturing Process',
+                  'Get Initial Parameters',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -88,9 +102,9 @@ class ControlCenterPage extends StatelessWidget {
 
   Widget _buildInputField(
       {required TextEditingController controller,
-      required String label,
-      required IconData icon,
-      required double screenWidth}) {
+        required String label,
+        required IconData icon,
+        required double screenWidth}) {
     return SizedBox(
       width: screenWidth * 0.3,
       child: TextField(
@@ -107,3 +121,5 @@ class ControlCenterPage extends StatelessWidget {
     );
   }
 }
+
+//3 parameters input
